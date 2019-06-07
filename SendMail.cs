@@ -69,6 +69,7 @@ namespace SecretSanta2._0
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
+                    Console.WriteLine(message.Body);
                 }
             }
         }

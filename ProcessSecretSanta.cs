@@ -37,12 +37,17 @@ namespace SecretSanta2._0
 
                 Console.WriteLine($"Found {_members.Count} members in Secret Santa.");
 
+                var attempts = 0;
                 while (!PairingsValid(pairings))
                 {
+                    attempts++;
+                    if(attempts > 1000){
+                        throw new Exception("Could not find addequate pairings in specified time. Try rerunning.");
+                    }
                     pairings = FindPairings();
                 }
 
-                Console.WriteLine($"Found Successful Pairings.");
+                Console.WriteLine($"Found Successful Pairings ({attempts} pairing tries).");
                 Console.WriteLine($"Sending Progress 0%.");
                 var numberThrough = 0M;
                 foreach (var pairing in pairings)
@@ -54,7 +59,7 @@ namespace SecretSanta2._0
 
                     _sendMail.SendToPhone(phoneNumber, $"{year} Secret Santa", $"You {pairing.Santa.Name} are {pairing.Receiver.Name}s Secret Santa! {this.extraMessage}");
                     numberThrough++;
-                    decimal percentage = numberThrough / pairings.Count;
+                    decimal percentage = (numberThrough / pairings.Count)*100;
                     Console.WriteLine($"Sending Progress {percentage}%.");
                 }
 
