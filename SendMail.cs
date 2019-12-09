@@ -42,7 +42,7 @@ namespace SecretSanta2._0
                 measureMessageTime = DateTime.Now;
             }
             // failsafe the number of messages that can go out with a single hour
-            if (numberOfMessages > 35)
+            if (numberOfMessages > 150)
             {
                 return;
             }

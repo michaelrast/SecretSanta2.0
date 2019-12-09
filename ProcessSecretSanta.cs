@@ -48,6 +48,27 @@ namespace SecretSanta2._0
                 }
 
                 Console.WriteLine($"Found Successful Pairings ({attempts} pairing tries).");
+                foreach(var pairing in pairings){
+                    Console.WriteLine($"You {pairing.Santa.Name} are {pairing.Receiver.Name}'s Secret Santa! {this.extraMessage}");
+                }
+
+
+                Console.WriteLine($"Hit y to continue or n to stop.");
+
+                var key = Console.ReadKey();
+
+                switch (key.KeyChar)
+                {
+                    case 'y':
+                        break;
+                    case 'n':
+                        Console.WriteLine($"Stopping");
+                        return;
+                    default:
+                        Console.WriteLine($"Follow directions!");
+                        return;
+                }
+
                 Console.WriteLine($"Sending Progress 0%.");
                 var numberThrough = 0M;
                 foreach (var pairing in pairings)
@@ -57,7 +78,7 @@ namespace SecretSanta2._0
                     if (!production)
                         phoneNumber = testNumber;
 
-                    _sendMail.SendToPhone(phoneNumber, $"{year} Secret Santa", $"You {pairing.Santa.Name} are {pairing.Receiver.Name}s Secret Santa! {this.extraMessage}");
+                    _sendMail.SendToPhone(phoneNumber, $"{year} Secret Santa", $"You {pairing.Santa.Name} are {pairing.Receiver.Name}'s Secret Santa! {this.extraMessage}");
                     numberThrough++;
                     decimal percentage = (numberThrough / pairings.Count)*100;
                     Console.WriteLine($"Sending Progress {percentage}%.");
@@ -85,7 +106,7 @@ namespace SecretSanta2._0
 
             foreach (var member in _members)
             {
-                var partnerOptions = _members.Where(i => i.Name != member.Name && i.Picked == false).ToList();
+                var partnerOptions = _members.Where(i => i.Name != member.Name && i.Picked == false && i.InAttendence == member.InAttendence).ToList();
 
                 if (partnerOptions.Count == 0)
                     continue;
