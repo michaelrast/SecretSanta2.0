@@ -4,6 +4,7 @@ public class SSMember
     public string Name { get; set; }
     public string PhoneNumber { get; set; }
     public bool Picked { get; set; }
+    public string Carrier { get; set; }
     public bool InAttendence {get;set;}
 
     public SSMember(string name, string phoneNumber, bool inAttendence)

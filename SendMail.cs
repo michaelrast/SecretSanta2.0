@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Net.Mail;
 using System.Net;
 using Microsoft.Extensions.Configuration;
+using SecretSanta2._0.Models;
 
 namespace SecretSanta2._0
 {
@@ -25,14 +23,40 @@ namespace SecretSanta2._0
             this.userName = _configurationSection.GetValue<string>("email_address_userName");
             this.password = _configurationSection.GetValue<string>("email_address_password");
         }
-        public void SendToPhone(string phoneNumber, string subject, string body)
+        public void SendToPhone(string phoneNumber, string carrier, string subject, string body)
         {
-            //brute force method... this is a hack and needs to be fixed
-            Send(subject, body, $"{phoneNumber}@vtext.com");//try sending it to verizon
-            Send(subject, body, $"{phoneNumber}@mms.att.net");//ATT
-            Send(subject, body, $"{phoneNumber}@pm.sprint.com");//sprint
-            Send(subject, body, $"{phoneNumber}@tmomail.net");//tmoble
+            string toEmail = "";
+            switch (carrier)
+            {
+                case (Carriers.Verizon):
+                    toEmail = $"{phoneNumber}@vtext.com";
+                    break;
+                case (Carriers.ATT):
+                    toEmail = $"{phoneNumber}@mms.att.net";
+                    break;
+                case (Carriers.TMobile):
+                    toEmail = $"{phoneNumber}@tmomail.net";
+                    break;
+                case (Carriers.Sprint):
+                    toEmail = $"{phoneNumber}@pm.sprint.com";
+                    break;
+                default:
+                    Console.WriteLine("Could not resolve email for phone number: " + phoneNumber);
+                    break;
+            }
+            //Send(subject, body, $"{phoneNumber}@vtext.com");//try sending it to verizon
+            //Send(subject, body, $"{phoneNumber}@mms.att.net");//ATT
+            //Send(subject, body, $"{phoneNumber}@pm.sprint.com");//sprint
+            //Send(subject, body, $"{phoneNumber}@tmomail.net");//tmoble
+
+            //Send(subject, body, $"{phoneNumber}@textmagic.com");//tmoble
+
+            if (!string.IsNullOrEmpty(toEmail))
+            {
+                Send(subject, body, toEmail);
+            }
         }
+
         public void Send(string subject, string body, string toAddress)
         {
             TimeSpan timespan = DateTime.Now - measureMessageTime;

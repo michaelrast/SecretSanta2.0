@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
+using SecretSanta2._0.Models;
 
 namespace SecretSanta2._0
 {
@@ -10,7 +11,7 @@ namespace SecretSanta2._0
     {
         private List<SSMember> _members { get; set; }
         private IConfigurationSection _configurationSection {get;set;}
-        private SendMail _sendMail {get;set;}
+        private SendMail _sendMail {get;set; }
         private string testNumber {get;set;}
         private string year {get;set;}
         private string extraMessage {get;set;}
@@ -33,9 +34,19 @@ namespace SecretSanta2._0
             try
             {
                 List<Pairing> pairings = new List<Pairing>();
-                _members = CompileMembersFromFile();
+                _members = CompileMembersFromFile(production);
 
                 Console.WriteLine($"Found {_members.Count} members in Secret Santa.");
+
+                if (_members.Any(i =>
+                    string.IsNullOrEmpty(i.Carrier) || (i.Carrier != Carriers.Verizon && i.Carrier != Carriers.ATT &&
+                    i.Carrier != Carriers.TMobile && i.Carrier != Carriers.Sprint)))
+                {
+                    Console.WriteLine("Could not resolve all user's Carriers.");
+                    Console.WriteLine("Press any key to exit");
+                    Console.ReadKey();
+                    return;
+                }
 
                 var attempts = 0;
                 while (!PairingsValid(pairings))
@@ -73,12 +84,8 @@ namespace SecretSanta2._0
                 var numberThrough = 0M;
                 foreach (var pairing in pairings)
                 {
-                    //test area
-                    var phoneNumber = pairing.Santa.PhoneNumber;
-                    if (!production)
-                        phoneNumber = testNumber;
-
-                    _sendMail.SendToPhone(phoneNumber, $"{year} Secret Santa", $"You {pairing.Santa.Name} are {pairing.Receiver.Name}'s Secret Santa! {this.extraMessage}");
+                    _sendMail.SendToPhone(pairing.Santa.PhoneNumber, pairing.Santa.Carrier, $"{year} Secret Santa", $"You {pairing.Santa.Name} are {pairing.Receiver.Name}'s Secret Santa! {this.extraMessage}");
+                    //_sendText.Send();
                     numberThrough++;
                     decimal percentage = (numberThrough / pairings.Count)*100;
                     Console.WriteLine($"Sending Progress {percentage}%.");
@@ -110,6 +117,8 @@ namespace SecretSanta2._0
 
                 if (partnerOptions.Count == 0)
                     continue;
+
+                partnerOptions = partnerOptions.OrderBy(a => Guid.NewGuid()).ToList();
 
                 var randomNumber = rnd.Next(0, partnerOptions.Count - 1);
                 var partner = partnerOptions[randomNumber];
@@ -156,7 +165,7 @@ namespace SecretSanta2._0
         //*
         //  will retrieve the file from the path set in the config file and will read the csv
         // */
-        private List<SSMember> CompileMembersFromFile()
+        private List<SSMember> CompileMembersFromFile(bool production)
         {
             try
             {
@@ -172,6 +181,19 @@ namespace SecretSanta2._0
                 List<SSMember> returnList = File.ReadAllLines(filePath)
                                             .Select(v => SSMember.FromCsv(v))
                                             .ToList();
+
+                foreach (var ssMember in returnList)
+                {
+                    //test area
+                    if (!production)
+                        ssMember.PhoneNumber = testNumber;
+
+                    string accountSid = _configurationSection.GetValue<string>("twilio_sid");
+                    string authToken = _configurationSection.GetValue<string>("twilio_authToken");
+                    ssMember.Carrier = TwilioService.LookupCarrier(accountSid, authToken, ssMember.PhoneNumber);
+
+                    Console.WriteLine(ssMember.Carrier);
+                }
 
                 return returnList;
             }

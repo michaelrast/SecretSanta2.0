@@ -32,6 +32,7 @@ appsettings_per.json
 #wwwroot/
 
 */obj/*
+*/bin/*
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
