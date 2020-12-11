@@ -60,7 +60,7 @@ namespace SecretSanta2._0
 
                 Console.WriteLine($"Found Successful Pairings ({attempts} pairing tries).");
                 foreach(var pairing in pairings){
-                    Console.WriteLine($"You {pairing.Santa.Name} are {pairing.Receiver.Name}'s Secret Santa! {this.extraMessage}");
+                    Console.WriteLine($"You {pairing.Santa.Name} are {pairing.Receiver.Name}'s Secret Santa! {this.extraMessage}  Send gift to - {pairing.Receiver.Address}");
                 }
 
 
@@ -84,7 +84,7 @@ namespace SecretSanta2._0
                 var numberThrough = 0M;
                 foreach (var pairing in pairings)
                 {
-                    _sendMail.SendToPhone(pairing.Santa.PhoneNumber, pairing.Santa.Carrier, $"{year} Secret Santa", $"You {pairing.Santa.Name} are {pairing.Receiver.Name}'s Secret Santa! {this.extraMessage}");
+                    _sendMail.SendToPhone(pairing.Santa.PhoneNumber, pairing.Santa.Carrier, $"{year} Secret Santa", $"You {pairing.Santa.Name} are {pairing.Receiver.Name}'s Secret Santa! {this.extraMessage}  Send gift to - {pairing.Receiver.Address}");
                     //_sendText.Send();
                     numberThrough++;
                     decimal percentage = (numberThrough / pairings.Count)*100;
@@ -113,7 +113,7 @@ namespace SecretSanta2._0
 
             foreach (var member in _members)
             {
-                var partnerOptions = _members.Where(i => i.Name != member.Name && i.Picked == false && i.InAttendence == member.InAttendence).ToList();
+                var partnerOptions = _members.Where(i => i.Name != member.Name && i.Picked == false && i.InAttendence == member.InAttendence && !member.PreviousList.Contains(i.Name)).ToList();
 
                 if (partnerOptions.Count == 0)
                     continue;
@@ -143,7 +143,7 @@ namespace SecretSanta2._0
 
             foreach (var pairing in pairings)
             {
-                if (pairing.Santa.Name == pairing.Receiver.Name)
+                if (pairing.Santa.Name == pairing.Receiver.Name || pairing.Santa.PreviousList.Contains(pairing.Receiver.Name))
                 {
                     ResetPicked();
                     return false;

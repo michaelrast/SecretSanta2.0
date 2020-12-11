@@ -9,6 +9,6 @@ namespace SecretSanta2._0.Models
         public const string Verizon = "Verizon Wireless";
         public const string ATT = "AT&T Wireless";
         public const string TMobile = "T-Mobile USA, Inc.";
-        public const string Sprint = "Sprint Wireless";
+        public const string Sprint = "Sprint Spectrum, L.P.";
     }
 }
