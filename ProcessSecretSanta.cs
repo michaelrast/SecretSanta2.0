@@ -33,6 +33,8 @@ namespace SecretSanta2._0
         {
             try
             {
+                var sendAddress = _configurationSection.GetValue<bool>("send_address");
+
                 List<Pairing> pairings = new List<Pairing>();
                 _members = CompileMembersFromFile(production);
 
@@ -60,7 +62,10 @@ namespace SecretSanta2._0
 
                 Console.WriteLine($"Found Successful Pairings ({attempts} pairing tries).");
                 foreach(var pairing in pairings){
-                    Console.WriteLine($"You {pairing.Santa.Name} are {pairing.Receiver.Name}'s Secret Santa! {this.extraMessage}  Send gift to - {pairing.Receiver.Address}");
+                    var str = $"You {pairing.Santa.Name} are {pairing.Receiver.Name}'s Secret Santa! {this.extraMessage}";
+                    if (sendAddress)
+                        str += $"  Send gift to - {pairing.Receiver.Address}";
+                    Console.WriteLine(str);
                 }
 
 
@@ -84,7 +89,10 @@ namespace SecretSanta2._0
                 var numberThrough = 0M;
                 foreach (var pairing in pairings)
                 {
-                    _sendMail.SendToPhone(pairing.Santa.PhoneNumber, pairing.Santa.Carrier, $"{year} Secret Santa", $"You {pairing.Santa.Name} are {pairing.Receiver.Name}'s Secret Santa! {this.extraMessage}  Send gift to - {pairing.Receiver.Address}");
+                    var str = $"You {pairing.Santa.Name} are {pairing.Receiver.Name}'s Secret Santa! {this.extraMessage}";
+                    if (sendAddress)
+                        str += $"  Send gift to - {pairing.Receiver.Address}";
+                    _sendMail.SendToPhone(pairing.Santa.PhoneNumber, pairing.Santa.Carrier, $"{year} Secret Santa", str);
                     //_sendText.Send();
                     numberThrough++;
                     decimal percentage = (numberThrough / pairings.Count)*100;
